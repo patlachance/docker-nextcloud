@@ -1,0 +1,75 @@
+nextcloud-nginx:
+  image: nginx
+  links:
+    - nextcloud:nextcloud
+  ports:
+    - 8000:8000
+  volumes:
+    - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    #- ./nginx/conf.d:/etc/nginx/conf.d
+
+nextcloud:
+  #image: wonderfall/nextcloud
+  image: nextcloud
+  links:
+    - nextcloud-db:nextcloud-db   # If using MySQL
+  environment:
+    - UID=1000
+    - GID=1000
+    - UPLOAD_MAX_SIZE=10G
+    - APC_SHM_SIZE=128M
+    - OPCACHE_MEM_SIZE=128
+    - CRON_PERIOD=15m
+    - TZ=Europe/Paris
+    - ADMIN_USER=nextadm            # Don't set to configure through browser
+    - ADMIN_PASSWORD=Dfghjk10        # Don't set to configure through browser
+    - DOMAIN=weboffice.lab-nxtit.com
+    - DB_TYPE=mysql
+    - DB_NAME=nextcloud
+    - DB_USER=nextuser
+    - DB_PASSWORD=nextpass10
+    - DB_HOST=nextcloud-db
+    - http_proxy=http://ciap01.lab-nxtit.com:3128/
+    - https_proxy=http://ciap01.lab-nxtit.com:3128/
+    - no_proxy=localhost,127.0.0.1,nextcloud
+    - HTTP_PROXY=http://ciap01.lab-nxtit.com:3128/
+    - HTTPS_PROXY=http://ciap01.lab-nxtit.com:3128/
+    - NO_PROXY=localhost,127.0.0.1,nextcloud
+  #ports:
+  #  - 8888:8888
+  volumes:
+    - /mnt/nextcloud/data:/data
+    - /mnt/nextcloud/config:/config
+    - /mnt/nextcloud/apps:/apps2
+    - /mnt/nextcloud/themes:/nextcloud/themes
+
+nextcloud-db:
+  image: mariadb:10
+  volumes:
+    - /mnt/nextcloud/db:/var/lib/mysql
+  environment:
+    - MYSQL_ROOT_PASSWORD=nextpass10
+    - MYSQL_DATABASE=nextcloud
+    - MYSQL_USER=nextuser
+    - MYSQL_PASSWORD=nextpass10
+
+collabora-nginx:
+  image: nginx
+  links:
+    - collabora:collabora
+  ports:
+    - 8001:8001
+  volumes:
+    - ./nginx-collabora/nginx.conf:/etc/nginx/nginx.conf
+
+collabora:
+  image: collabora/code
+  cap_add:
+    - MKNOD
+  environment:
+    - username=colladm
+    - password=Dfghjk10
+    - domain=weboffice\\.lab-nxtit\\.com
+  #ports:
+  #  - 8888:8888
+
